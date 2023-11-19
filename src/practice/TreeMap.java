@@ -107,6 +107,90 @@ public class TreeMap<K, V> {
 
     }
 
+    public void remove(K key){
+
+        //root가 삭제할 키라면, 바로 앞값이나 뒤값을 찾아서 root로 바꿔줌
+        Entry<K, V> tempNode = root;
+        //키가 같다면 삭제
+        while(tempNode!= null){
+            System.out.println(tempNode.getKey() + " 키 확인");
+            if(tempNode.getKey().hashCode() == key.hashCode()){
+                System.out.println("같은 키값이 있습니다.");
+                Entry<K, V> deletingNode = tempNode;
+                Entry<K, V> priorNode = null;
+
+                //동일한 노드를 삭제하고 갈아끼워야 됨
+                //현재 노드를 왼쪽 자식 노드의 가장 오른쪽 노드 또는 오른쪽 자식 노드의 가장 왼쪽 노드로 갈아끼움
+                if(tempNode.getLeft() != null){
+                    priorNode = tempNode;
+                    tempNode = tempNode.getLeft();  //왼쪽으로 한 번 이동 -> 오른쪽 노드 확인
+                    while(tempNode!= null){
+                        if(tempNode.getRight() != null){
+                            priorNode = tempNode;
+                            tempNode = tempNode.getRight(); //이후 오른쪽 노드가 있다면 오른쪽 노드로 이동 -> 없을 때까지 이동
+                        } else {
+                            tempNode = null;
+                        }
+                    }
+                    System.out.println("삭제노드체크-----");
+                    System.out.println("이전 노드, 대체할 노드 " + priorNode.getKey());
+                    System.out.println("삭제할 노드 " + deletingNode.getKey());
+
+                    //
+                    System.out.println("삭제할 노드의 왼쪽 노드 = " + deletingNode.getLeft().getKey());
+                    System.out.println("삭제할 노드의 오른쪽 노드 = " + deletingNode.getRight().getKey());
+                    priorNode.setLeft(deletingNode.getLeft());  //대체하기 전 대체할 노드의 왼쪽 오른쪽을 미리 연결 해둠
+                    priorNode.setRight(deletingNode.getRight());
+
+                    deletingNode = priorNode; // 대체할 마지막 노드를 삭제할 노드랑 교체
+                    System.out.println(deletingNode.getKey() + "키 를 삭제했습니다.");
+                    priorNode = null;   // 대체노드 삭제
+
+
+                } else if(tempNode.getRight() != null){
+                    priorNode = tempNode;
+                    tempNode = tempNode.getRight();  //왼쪽으로 한 번 이동 -> 오른쪽 노드 확인
+                    while(tempNode!= null){
+                        if(tempNode.getLeft() != null){
+                            priorNode = tempNode;
+                            tempNode = tempNode.getLeft(); //이후 오른쪽 노드가 있다면 오른쪽 노드로 이동 -> 없을 때까지 이동
+                        } else {
+                            tempNode = null;
+                        }
+                    }
+                    System.out.println("삭제노드체크-----");
+                    System.out.println("이전 노드, 대체할 노드 " + priorNode.getKey());
+                    System.out.println("삭제할 노드" + deletingNode.getKey());
+
+                    //
+                    System.out.println("삭제할 노드의 왼쪽 노드 = " + deletingNode.getLeft().getKey());
+                    System.out.println("삭제할 노드의 오른쪽 노드 = " + deletingNode.getRight().getKey());
+
+                    priorNode.setLeft(deletingNode.getLeft());  //대체하기 전 대체할 노드의 왼쪽 오른쪽을 미리 연결 해둠
+                    priorNode.setRight(deletingNode.getRight());
+
+                    deletingNode = priorNode; // 대체할 마지막 노드를 삭제할 노드랑 교체
+                    System.out.println(deletingNode.getKey()+"키 를 삭제했습니다.");
+                    priorNode = null;   // 대체노드 삭제
+
+                } else {
+                    //현재 노드에 왼쪽 오른쪽도 없다면 그냥 null로 지워줌
+                    tempNode = null;
+                }
+                //현재 노드키가 더 크면 왼쪽 노드를 비교
+            } else if(tempNode.getKey().hashCode() > key.hashCode()){
+                System.out.println(tempNode.getKey() + "보다 작습니다.");
+                tempNode = tempNode.getLeft();
+                //현재 노드키가 더 작다면 오른쪽 노드를 비교
+            } else if(tempNode.getKey().hashCode() < key.hashCode()){
+                System.out.println(tempNode.getKey() + "보다 큽니다.");
+                tempNode = tempNode.getRight();
+            }
+        }
+        //root가 null이면 삭제 노드 없음.
+        System.out.println("삭제할 노드가 없습니다.");
+    }
+
     public Entry<K, V> getFirstEntry(){
         System.out.println("루트의 키는 " + root.getKey() + ", 루트의 값은 " + root.getValue());
         return root;
@@ -118,10 +202,12 @@ public class TreeMap<K, V> {
 
     private Entry<K, V> print(Entry<K, V> node){
         if(node != null){
-            System.out.println("(키) " + node.getKey() + "(값) " + node.getValue());
+            //재귀 순서에 따라 노드 출력 순서 다름
+            //Left, print, Right 순서면 키가 작은 거 부터 출력됨
             if(node.getLeft() != null){
                 print(node.getLeft());
             }
+            System.out.println("(키) " + node.getKey() + "(값) " + node.getValue());
             if(node.getRight() != null){
                 print(node.getRight());
             }

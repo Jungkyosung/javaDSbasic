@@ -16,6 +16,7 @@ public class Main {
         tree.put("난","난");
         tree.put("ㄴ","ㄴ");
         tree.put("고드1","고드1");
+        tree.remove("다");
         tree.getFirstEntry();
         tree.printAll();
 
