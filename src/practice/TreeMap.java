@@ -15,8 +15,8 @@ public class TreeMap<K, V> {
     //4. 자료 제거(remove())
     //5. 첫노드 조회(getFirstEntry())
     //6. 마지막노드 조회(getLastEntry())
-    //7. 특정노드의 앞노드 조회(getSuccessor())
-    //8. 특정노드의 뒷노드 조회(getPredecessor())
+    //7. 특정노드의 앞노드 조회(getSuccessor())   -> parent와 동일?? 회전할 노드를 조회하는 건가?
+    //8. 특정노드의 뒷노드 조회(getPredecessor()) ->
     //9. 특정노드의 왼쪽 노드 조회(leftOf(Entry))
     //10. 특정노드의 오른쪽 노드 조회(rightOf(Entry))
     //11. 특정 노드 삽입 후 조정(fixAfterInsertion(Entry))
@@ -107,12 +107,8 @@ public class TreeMap<K, V> {
                 break;
             }
         }
-
-        //값을 엎어씌워서 while을 빠져나온 케이스(tempNode != null)
-        //최종까지 내려온 케이스(tempNode == null)
     }
 
-    //해당 키와 같은 노드 삭제
     public void remove(K key){
 
         //root가 삭제할 키라면, 바로 앞값이나 뒤값을 찾아서 root로 바꿔줌
@@ -120,7 +116,6 @@ public class TreeMap<K, V> {
 
         //키가 같다면 삭제(while문이 너무 길다 함수로 중간 내용 빼야 함.)
         while(tempNode!= null){
-            System.out.println(tempNode.getKey() + " 키 확인");
 
             if(tempNode.getKey().hashCode() == key.hashCode()){
                 //키가 갇다면 해당 노드 삭제 후 트리의 구조 조정
@@ -129,19 +124,17 @@ public class TreeMap<K, V> {
 
                 //현재 노드키가 더 크면 왼쪽 노드를 비교
             } else if(tempNode.getKey().hashCode() > key.hashCode()){
-                System.out.println(tempNode.getKey() + "보다 작습니다.");
+                //System.out.println(tempNode.getKey() + "보다 작습니다.");
                 tempNode = tempNode.getLeft();
                 //현재 노드키가 더 작다면 오른쪽 노드를 비교
             } else if(tempNode.getKey().hashCode() < key.hashCode()){
-                System.out.println(tempNode.getKey() + "보다 큽니다.");
+                //System.out.println(tempNode.getKey() + "보다 큽니다.");
                 tempNode = tempNode.getRight();
             }
         }
-
         //노드 삭제, 트리 조정을 하지 않았다면 삭제 노드 없음.
         System.out.println("삭제할 노드가 없습니다.");
     }
-
 
     private void removeNodeAndFixTree(Entry<K, V> tempNode) {
         System.out.println("같은 키값이 있습니다.");
@@ -150,16 +143,22 @@ public class TreeMap<K, V> {
         Entry<K, V> priorNode = null;           //삭제노드의 부모
         Entry<K, V> alterNode = null;           //대체할 노드
         Entry<K, V> parentOfDeletingNode = deletingNode.getParent();//삭제노드의 부모
+
         //현재 노드를 왼쪽 자식 노드의 가장 오른쪽 노드 또는 오른쪽 자식 노드의 가장 왼쪽 노드로 갈아끼움
         if(tempNode.getLeft() != null){
-
             //삭제노드의 왼쪽 노드에서 가장 오른쪽 노드 찾기(대체할 노드)
             alterNode = findAlterNodeToLeft(tempNode);
+
+            //자식들의 부모도 대체할 노드로 바꿔줘야 됨.
 
 
             if(deletingNode.getLeft() == alterNode){    //삭제노드와 대체노드가 연결되어 있다면?
                 if(parentOfDeletingNode != null){   //삭제노드의 부모가 있다면,
-                    parentOfDeletingNode.setLeft(alterNode);    //부모의 자식으로 대체노드 지정
+                    if(parentOfDeletingNode.getLeft() == deletingNode){
+                        parentOfDeletingNode.setLeft(alterNode);    //ㅁㅁㅁ부모의 자식으로 대체노드 지정
+                    } else {
+                        parentOfDeletingNode.setRight(alterNode);    //ㅁㅁㅁ부모의 자식으로 대체노드 지정
+                    }
                 }
                 alterNode.setRight(deletingNode.getRight());    //삭제노드의 자식을 연결
             } else {
@@ -169,27 +168,21 @@ public class TreeMap<K, V> {
                 alterNode.setParent(deletingNode.getParent());  //삭제노드의 부모를 대체노드의 부모로 지정
                 alterNode.setLeft(deletingNode.getLeft());      //삭제노드의 자식을 대체노드의 자식으로 지정
                 alterNode.setRight(deletingNode.getRight());
-
+                if(deletingNode.getLeft() != null) deletingNode.getLeft().setParent(alterNode);
+                if(deletingNode.getRight() != null) deletingNode.getRight().setParent(alterNode);
             }
-
-            System.out.println("-------삭제노드체크-----");
-            System.out.println("대체할 노드 " + alterNode.getKey());
-            System.out.println("삭제할 노드 " + deletingNode.getKey());
-
             System.out.println(deletingNode.getKey() + "키 를 삭제했습니다.");
             deletingNode = null;   // 삭제노드 삭제
-
-
-
         } else if(tempNode.getRight() != null){
-
             //삭제노드의 오른쪽 가지에서 가장 왼쪽 노드 찾기(대체할 노드)
             alterNode = findAlterNodeToRight(tempNode);
-
-
             if(deletingNode.getRight() == alterNode){    //삭제노드와 대체노드가 연결되어 있다면?
                 if(parentOfDeletingNode != null){   //삭제노드의 부모가 있다면,
-                    parentOfDeletingNode.setRight(alterNode);    //부모의 자식으로 대체노드 지정
+                    if(parentOfDeletingNode.getLeft() == deletingNode){
+                        parentOfDeletingNode.setLeft(alterNode);    //ㅁㅁㅁ부모의 자식으로 대체노드 지정
+                    } else {
+                        parentOfDeletingNode.setRight(alterNode);    //ㅁㅁㅁ부모의 자식으로 대체노드 지정
+                    }
                 }
                 alterNode.setLeft(deletingNode.getLeft());    //삭제노드의 자식을 연결
             } else {
@@ -199,35 +192,23 @@ public class TreeMap<K, V> {
                 alterNode.setParent(deletingNode.getParent());  //삭제노드의 부모를 대체노드의 부모로 지정
                 alterNode.setLeft(deletingNode.getLeft());      //삭제노드의 자식을 대체노드의 자식으로 지정
                 alterNode.setRight(deletingNode.getRight());
-
+                if(deletingNode.getLeft() != null) deletingNode.getLeft().setParent(alterNode);
+                if(deletingNode.getRight() != null) deletingNode.getRight().setParent(alterNode);
             }
-
-            System.out.println("-------삭제노드체크-----");
-            System.out.println("대체할 노드 " + alterNode.getKey());
-            System.out.println("삭제할 노드" + deletingNode.getKey());
-
-            //삭제가 루트인 경우? 노상관. 중간이든 루트든 상관은 없음
-
-            //--삭제노드와 대체노드가 연결이 둘 이상일 경우--
-            //삭제노드가 부모가 있다고 가정(부모노드만 잘 맺어져 있다면 문제 없음)
-            //대체노드 부모 -> 삭제노드 부모
-            //대체노드에 자식이 있다면??
-            //대체노드에 부모를 대체노드 자식과 연결
-
-            //--삭제노드와 대체노드가 연결이 직접연결인 경우--
-            //삭제노드의 부모가 있다면, 그 부모의 자식으로 대체노드 연결
-            //없다면,
-            //삭제노드의 자식이 있다면, 대체노드의 자식으로 연결
-
             System.out.println(deletingNode.getKey()+"키 를 삭제했습니다.");
             deletingNode = null; // / 삭제노드 삭제
-
         } else {
             //현재 노드에 왼쪽 오른쪽도 없다면 그냥 null로 지워줌
+            //연결 끊어야 함.
+            if(tempNode.getParent().getLeft() == tempNode){
+                tempNode.getParent().setLeft(null);
+            } else if(tempNode.getParent().getRight() == tempNode){
+                tempNode.getParent().setRight(null);
+            }
+            System.out.println(tempNode.getKey() + " 키를 삭제했습니다.");
             tempNode = null;
         }
     }
-
 
     private Entry<K, V> findAlterNodeToLeft(Entry<K, V> tempNode){
 
@@ -238,11 +219,9 @@ public class TreeMap<K, V> {
             if (tempNode.getRight() != null) {
                 tempNode = tempNode.getRight(); //이후 오른쪽 노드가 있다면 오른쪽 노드로 이동 -> 없을 때까지 이동
             } else {
-
                 tempNode = null;
             }
         }
-        System.out.println("너 뭐임??" + priorNode.getKey());
 
         //priorNode는 널일 수 가 없음. tempNode.getLeft가 널이 아닌 걸 확인하기 때문에
         if(priorNode == null){
@@ -272,7 +251,6 @@ public class TreeMap<K, V> {
             return priorNode;
         }
     }
-
 
     public Entry<K, V> getFirstEntry(){
         System.out.println("루트의 키는 " + root.getKey() + ", 루트의 값은 " + root.getValue());
@@ -355,6 +333,4 @@ public class TreeMap<K, V> {
             this.parent = node;
         }
     }
-
 }
-
