@@ -14,6 +14,19 @@ public class Fibonaci{
 
     System.out.println("피보나치 반복문 소요시간= " + (eTime - sTime));
 
+    //스트림 활용한 피보나치
+    Stream.iterate(new int[]{0,1}, n -> new int[]{n[1], n[0] + n[1]}
+    //                        {
+    //                            int c = n[0];
+    //                            n[0] = n[1];
+    //                            n[1] = c + n[1];
+    //                            return n;
+    //                        }
+            )
+            .limit(20)
+            .forEach(t -> System.out.println("(" + t[0] + "," + t[1] + ")"));
+
+    
   }
   double 피보나치(int num, double[] memo){
         if(num == 1){
@@ -42,8 +55,4 @@ public class Fibonaci{
         }
         return a;
     }
-  
-
-  
-
 }
